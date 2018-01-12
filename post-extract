@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+service-attacher-post-extract() {
+  declare desc="triggers the create-linked-service hook in the right directory"
+  declare APP="$1" TMP_WORK_DIR="$2"
+
+  pushd "$TMP_WORK_DIR" > /dev/null
+  service-attacher-create-linked-service "$APP"
+  popd > /dev/null
+}
+
+service-attacher-create-linked-service() {
+  declare desc="creates a service and links it if there is a docker-compose file with the correct label"
+  declare APP="$1"
+
+  if (is_deployed "$APP"); then
+    return
+  fi
+
+  if [[ ! -f "docker-compose.yml" ]]; then
+    return
+  fi
+
+  if ! grep --quiet "dokku.service.mysql=" docker-compose.yml; then
+    return
+  fi
+
+  if ! dokku mysql:exists "$APP" > /dev/null; then
+    dokku mysql:create "$APP"
+  fi
+
+  if ! dokku mysql:linked "$APP" "$APP" > /dev/null; then
+    dokku mysql:link "$APP" "$APP"
+  fi
+}
+
+service-attacher-post-extract "$@"
