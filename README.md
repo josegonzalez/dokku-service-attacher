@@ -2,10 +2,6 @@
 
 [EXPERIMENTAL] Creates and links a dokku service if an app's docker-compose.yml has the correct label.
 
-Currenly only supports the following dokku service plugins:
-
-- mysql
-
 ## requirements
 
 - dokku 0.4.x+
